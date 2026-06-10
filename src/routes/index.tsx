@@ -245,37 +245,70 @@ function Mundo() {
   );
 }
 
-const TRAITS = [
-  "Curiosa",
-  "Auxiliadora",
-  "Meiga",
-  "Atenciosa",
-  "Carinhosa",
-  "Alegre",
-  "Esforçada",
-  "Um pouco tímida",
-  "Sempre disposta a servir",
-  "Aceita aventuras inesperadas",
-  "Gosta de cuidar das pessoas",
-  "Não consegue ficar parada muito tempo",
+const TRAITS: { t: string; d: string; icon: string }[] = [
+  { t: "Curiosa", d: "sempre com uma pergunta nova guardada no bolso.", icon: "🔎" },
+  { t: "Auxiliadora", d: "aparece antes mesmo de pedirem ajuda.", icon: "🤝" },
+  { t: "Meiga", d: "tem um jeito que acalma o ambiente.", icon: "🌷" },
+  { t: "Atenciosa", d: "lembra dos detalhes que ninguém mais lembra.", icon: "📝" },
+  { t: "Carinhosa", d: "cuida em pequenos gestos diários.", icon: "💌" },
+  { t: "Alegre", d: "tem um riso que contagia até quem não sabia que precisava.", icon: "☀️" },
+  { t: "Esforçada", d: "insiste, mesmo quando seria mais fácil desistir.", icon: "🌱" },
+  { t: "Um pouco tímida", d: "e isso é parte do charme.", icon: "🌙" },
+  { t: "Servir", d: "ajuda como quem oferece um café quentinho.", icon: "🍵" },
+  { t: "Aventureira", d: "topa o inesperado quando vale a pena.", icon: "🧭" },
+  { t: "Cuidadora", d: "vê as pessoas — de verdade.", icon: "🫶" },
+  { t: "Inquieta", d: "raramente parada, sempre criando.", icon: "✨" },
 ];
 
 function Voce() {
+  const [flipped, setFlipped] = useState<Set<number>>(new Set());
+  const toggle = (i: number) =>
+    setFlipped((prev) => {
+      const n = new Set(prev);
+      n.has(i) ? n.delete(i) : n.add(i);
+      return n;
+    });
+  const progress = flipped.size;
   return (
     <Section id="voce" eyebrow="capítulo 2" title="Quem você é">
       <p className="text-lg text-muted-foreground max-w-2xl">
-        Um pequeno retrato — feito de gestos, e não só de palavras.
+        Um pequeno retrato — toque em cada carta para virá-la e ler o lado de dentro.
       </p>
-      <ul className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {TRAITS.map((t) => (
-          <li
-            key={t}
-            className="paper-card px-4 py-5 text-center text-foreground hover:border-[var(--gold)] transition-colors"
-          >
-            <span className="hand text-xl">{t}</span>
+      <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <span>{progress} de {TRAITS.length} reveladas</span>
+        <div className="flex gap-1.5 ml-2">
+          {TRAITS.map((_, i) => (
+            <span key={i} className={`dot ${flipped.has(i) ? "on" : ""}`} />
+          ))}
+        </div>
+      </div>
+      <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {TRAITS.map((t, i) => (
+          <li key={t.t} className="flip" style={{ height: 140 }}>
+            <button
+              onClick={() => toggle(i)}
+              aria-label={`Virar carta: ${t.t}`}
+              aria-pressed={flipped.has(i)}
+              className={`flip ${flipped.has(i) ? "is-flipped" : ""} w-full h-full block`}
+            >
+              <div className="flip-inner">
+                <div className="flip-face paper-card flex-col gap-2">
+                  <span className="text-2xl" aria-hidden>{t.icon}</span>
+                  <span className="hand text-xl text-foreground">{t.t}</span>
+                </div>
+                <div className="flip-face flip-back paper-card" style={{ background: "var(--accent)" }}>
+                  <span className="text-sm text-foreground leading-snug">{t.d}</span>
+                </div>
+              </div>
+            </button>
           </li>
         ))}
       </ul>
+      {progress === TRAITS.length && (
+        <p className="hand text-2xl text-center mt-8 text-[var(--gold)] fade-up">
+          Doze cartas, um só retrato — e ainda assim, falta espaço pra tudo que você é.
+        </p>
+      )}
     </Section>
   );
 }
