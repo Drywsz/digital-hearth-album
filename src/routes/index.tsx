@@ -167,6 +167,8 @@ function Section({
 }
 
 function Hero() {
+  // troque a URL abaixo por uma foto dela: ex. "/foto-dela.jpg"
+  const heroPhoto: string | undefined = undefined;
   return (
     <section
       id="inicio"
@@ -176,9 +178,22 @@ function Hero() {
       <div className="starry absolute inset-0 opacity-70 pointer-events-none" aria-hidden />
       <div className="relative text-center max-w-3xl fade-up">
         <p className="hand text-3xl text-[var(--gold)] twinkle">para você</p>
+
+        <div className="mt-8 flex justify-center">
+          <div className="photo-frame">
+            {heroPhoto ? (
+              <img src={heroPhoto} alt="ela" />
+            ) : (
+              <span className="hand text-base md:text-lg text-muted-foreground text-center px-4 leading-tight">
+                bote a foto<br />dela aqui ✦
+              </span>
+            )}
+          </div>
+        </div>
+
         <h1
           id="inicio-title"
-          className="mt-4 text-4xl md:text-6xl font-medium leading-tight text-foreground"
+          className="mt-8 text-4xl md:text-6xl font-medium leading-tight text-foreground"
         >
           Algumas pessoas passam pela nossa vida.
           <br />
@@ -320,45 +335,57 @@ type Admiracao = {
   y: number;
 };
 
+// 12 pontos posicionados em forma de coração — ordem segue o contorno
 const ADMIRO: Admiracao[] = [
-  { t: "Quando você escuta", d: "de verdade — sem pressa, com os olhos atentos.", x: 14, y: 30 },
-  { t: "Quando você ajuda", d: "como quem não busca nada em troca, só faz porque é quem é.", x: 32, y: 68 },
-  { t: "Quando você ri", d: "do nada, de tudo, e o ambiente inteiro fica mais leve.", x: 48, y: 22 },
-  { t: "Quando você se importa", d: "com detalhes pequenos que a maioria sequer enxerga.", x: 62, y: 56 },
-  { t: "Quando você não desiste", d: "mesmo cansada, mesmo tímida, mesmo quando seria mais fácil parar.", x: 80, y: 34 },
-  { t: "Quando você é gentil", d: "com quem não esperava ser tratado com gentileza.", x: 88, y: 72 },
+  { t: "Quando você escuta", d: "de verdade — sem pressa, com os olhos atentos.", x: 35, y: 18 },
+  { t: "Quando você sorri", d: "e o ambiente inteiro parece ficar mais leve.", x: 50, y: 24 },
+  { t: "Quando você se importa", d: "com detalhes que a maioria sequer enxerga.", x: 65, y: 18 },
+  { t: "Quando você ajuda", d: "como quem não busca nada em troca.", x: 78, y: 26 },
+  { t: "Quando você é gentil", d: "com quem menos esperava ser tratado assim.", x: 85, y: 40 },
+  { t: "Quando você se esforça", d: "mesmo cansada, mesmo tímida, mesmo difícil.", x: 80, y: 56 },
+  { t: "Quando você cuida", d: "das pessoas — com aquele zelo silencioso.", x: 68, y: 70 },
+  { t: "Quando você é honesta", d: "mesmo quando seria mais fácil disfarçar.", x: 50, y: 86 },
+  { t: "Quando você é fiel", d: "às suas crenças, às pessoas, a quem você é.", x: 32, y: 70 },
+  { t: "Quando você é curiosa", d: "e descobre coisas com olhos de criança.", x: 20, y: 56 },
+  { t: "Quando você é leve", d: "e transforma o dia comum em algo bonito.", x: 15, y: 40 },
+  { t: "Quando você é você", d: "— e isso, por si só, já basta.", x: 22, y: 26 },
 ];
 
+// Arestas predefinidas: contorno do coração
+const ADMIRO_EDGES: [number, number][] = ADMIRO.map((_, i) => [i, (i + 1) % ADMIRO.length]);
+
 function Admiro() {
-  const [order, setOrder] = useState<number[]>([]);
-  const last = order[order.length - 1];
-  const current = last !== undefined ? ADMIRO[last] : null;
-  const complete = order.length === ADMIRO.length;
+  const [lit, setLit] = useState<Set<number>>(new Set());
+  const [lastTap, setLastTap] = useState<number | null>(null);
+  const current = lastTap !== null ? ADMIRO[lastTap] : null;
+  const complete = lit.size === ADMIRO.length;
 
   function tap(i: number) {
-    setOrder((o) => (o.includes(i) ? o : [...o, i]));
+    setLit((prev) => {
+      const n = new Set(prev);
+      n.add(i);
+      return n;
+    });
+    setLastTap(i);
   }
   function reset() {
-    setOrder([]);
+    setLit(new Set());
+    setLastTap(null);
   }
 
-  // SVG lines between consecutive lit stars
-  const lines = order.slice(1).map((idx, k) => {
-    const a = ADMIRO[order[k]];
-    const b = ADMIRO[idx];
-    return { x1: a.x, y1: a.y, x2: b.x, y2: b.y, key: `${order[k]}-${idx}` };
-  });
+  // Só desenha aresta quando AMBAS as estrelas estiverem acesas
+  const lines = ADMIRO_EDGES.filter(([a, b]) => lit.has(a) && lit.has(b));
 
   return (
     <Section id="admiro" eyebrow="capítulo 3" title="As pequenas coisas que admiro">
       <p className="text-lg text-muted-foreground max-w-2xl">
-        Cada estrela é uma coisa que admiro em você. Toque uma por vez — e veja a constelação
-        se formando.
+        São doze estrelas — e juntas elas formam um desenho. Toque em cada uma na ordem que
+        quiser; o contorno aparece sozinho.
       </p>
 
       <div
         className="constellation relative mt-8 paper-card overflow-hidden"
-        style={{ height: 360 }}
+        style={{ height: 460 }}
         aria-label="Constelação de admirações"
       >
         <svg
@@ -367,28 +394,28 @@ function Admiro() {
           preserveAspectRatio="none"
           aria-hidden
         >
-          {lines.map((l) => (
+          {lines.map(([a, b]) => (
             <line
-              key={l.key}
+              key={`${a}-${b}`}
               className="constellation-line"
-              x1={l.x1}
-              y1={l.y1}
-              x2={l.x2}
-              y2={l.y2}
+              x1={ADMIRO[a].x}
+              y1={ADMIRO[a].y}
+              x2={ADMIRO[b].x}
+              y2={ADMIRO[b].y}
               vectorEffect="non-scaling-stroke"
             />
           ))}
         </svg>
 
         {ADMIRO.map((a, i) => {
-          const lit = order.includes(i);
+          const on = lit.has(i);
           return (
             <button
               key={a.t}
               onClick={() => tap(i)}
-              aria-pressed={lit}
+              aria-pressed={on}
               aria-label={a.t}
-              className={`star-btn ${lit ? "lit" : ""}`}
+              className={`star-btn ${on ? "lit" : ""}`}
               style={{
                 left: `calc(${a.x}% - 18px)`,
                 top: `calc(${a.y}% - 18px)`,
@@ -401,7 +428,6 @@ function Admiro() {
           );
         })}
 
-        {/* Floating message */}
         {current && !complete && (
           <div
             key={current.t}
@@ -415,10 +441,10 @@ function Admiro() {
         {complete && (
           <div className="absolute inset-0 flex items-center justify-center bg-background/85 backdrop-blur-sm fade-up p-6">
             <div className="text-center max-w-xl">
-              <p className="hand text-3xl md:text-4xl text-[var(--gold)]">a constelação</p>
+              <p className="hand text-3xl md:text-4xl text-[var(--gold)]">um coração inteiro</p>
               <p className="mt-3 text-foreground text-lg leading-relaxed">
-                Cada estrelinha é pequena sozinha. Juntas, viram uma constelação inteira — e é
-                mais ou menos assim que eu te enxergo.
+                Doze estrelinhas, um só desenho. Cada uma é pequena sozinha — juntas, viram a
+                forma exata do que sinto quando penso em você.
               </p>
             </div>
           </div>
@@ -426,8 +452,8 @@ function Admiro() {
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-        <span>{order.length} de {ADMIRO.length} estrelas acesas</span>
-        {order.length > 0 && (
+        <span>{lit.size} de {ADMIRO.length} estrelas acesas</span>
+        {lit.size > 0 && (
           <button
             onClick={reset}
             className="underline-offset-4 hover:underline hover:text-foreground transition-colors"
@@ -437,15 +463,14 @@ function Admiro() {
         )}
       </div>
 
-      {/* Quiet list below for accessibility / completeness */}
       <ul className="mt-10 grid md:grid-cols-2 gap-3">
         {ADMIRO.map((a, i) => {
-          const lit = order.includes(i);
+          const on = lit.has(i);
           return (
             <li
               key={a.t}
               className={`paper-card p-4 transition-all ${
-                lit ? "border-[var(--gold)]" : "opacity-70"
+                on ? "border-[var(--gold)]" : "opacity-70"
               }`}
             >
               <p className="hand text-xl text-foreground">{a.t}</p>
@@ -940,26 +965,52 @@ function Sonhos() {
 
 
 function Carta() {
+  const [open, setOpen] = useState(false);
   return (
     <Section id="carta" eyebrow="capítulo 9" title="Uma carta para você">
-      <article className="paper-card p-8 md:p-12 max-w-3xl mx-auto">
-        <p className="hand text-2xl text-[var(--gold)]">Oi,</p>
-        <div className="mt-4 space-y-4 text-lg leading-relaxed text-foreground">
-          <p>
-            Eu não sei exatamente como começar — então começo do jeito mais honesto que conheço:
-            admirando você.
-          </p>
-          <p>
-            Admiro o jeito que você se importa com as pessoas, o modo como você encara as coisas
-            simples, e essa coragem silenciosa de seguir tentando, mesmo quando parece difícil.
-          </p>
-          <p>
-            Esse pequeno lugar não é um pedido. É só um cuidado em forma de site — um jeito de
-            dizer que você é especial, sem pressa, sem peso. Só com carinho.
-          </p>
-          <p className="hand text-2xl text-foreground">— com carinho.</p>
-        </div>
-      </article>
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Tem um envelope aqui embaixo — toque para abrir.
+      </p>
+
+      <div className="mt-10 flex justify-center">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-label={open ? "Fechar carta" : "Abrir carta"}
+          className={`envelope ${open ? "is-open" : ""}`}
+        >
+          <div className="env-back" aria-hidden />
+          <div className="env-letter" aria-hidden={!open}>
+            <p className="hand text-2xl text-[var(--gold)]">Oi,</p>
+            <div className="mt-3 space-y-3 text-[15px] md:text-base leading-relaxed text-foreground text-left">
+              <p>
+                Eu não sei exatamente como começar — então começo do jeito mais honesto que
+                conheço: admirando você.
+              </p>
+              <p>
+                Admiro o jeito que você se importa com as pessoas, o modo como você encara as
+                coisas simples, e essa coragem silenciosa de seguir tentando, mesmo quando parece
+                difícil.
+              </p>
+              <p>
+                Esse pequeno lugar não é um pedido. É só um cuidado em forma de site — um jeito
+                de dizer que você é especial, sem pressa, sem peso. Só com carinho.
+              </p>
+              <p className="hand text-2xl text-foreground">— com carinho.</p>
+            </div>
+          </div>
+          <div className="env-front" aria-hidden />
+          <div className="env-flap" aria-hidden>
+            <div className="env-seal">✦</div>
+          </div>
+        </button>
+      </div>
+
+      {!open && (
+        <p className="hand text-center text-xl text-muted-foreground mt-6">
+          toque no envelope ↑
+        </p>
+      )}
     </Section>
   );
 }

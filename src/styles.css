@@ -385,3 +385,131 @@
   opacity: 0.7;
   filter: drop-shadow(0 0 4px var(--gold));
 }
+
+/* ---------- Hero photo frame ---------- */
+.photo-frame {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: var(--color-card);
+  border: 2px dashed oklch(0.75 0.06 85 / 0.6);
+  box-shadow:
+    0 0 0 8px var(--color-card),
+    0 0 0 10px var(--gold),
+    0 18px 40px oklch(0.3 0.02 60 / 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  animation: float-soft 6s ease-in-out infinite;
+}
+.photo-frame::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 70%, oklch(0.78 0.11 85 / 0.35) 75%, transparent 80%);
+  animation: photo-spin 12s linear infinite;
+  z-index: -1;
+}
+@keyframes photo-spin { to { transform: rotate(360deg); } }
+.photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+@media (min-width: 768px) {
+  .photo-frame { width: 200px; height: 200px; }
+}
+
+/* ---------- Envelope (Carta) ---------- */
+.envelope {
+  position: relative;
+  width: min(420px, 92vw);
+  height: 260px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  perspective: 1500px;
+  transition: transform 0.4s ease;
+}
+.envelope:hover { transform: translateY(-4px); }
+.envelope .env-back {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(0.88 0.06 85), oklch(0.82 0.07 80));
+  border-radius: 6px;
+  box-shadow: 0 18px 40px oklch(0.3 0.02 60 / 0.22), 0 2px 0 oklch(0.3 0.02 60 / 0.08) inset;
+}
+.envelope .env-front {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(0.86 0.07 85), oklch(0.8 0.08 78));
+  border-radius: 6px;
+  clip-path: polygon(0 45%, 50% 100%, 100% 45%, 100% 100%, 0 100%);
+  z-index: 3;
+  box-shadow: 0 2px 0 oklch(0.3 0.02 60 / 0.08) inset;
+}
+.envelope .env-flap {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, oklch(0.84 0.08 82), oklch(0.78 0.09 78));
+  clip-path: polygon(0 0, 100% 0, 50% 55%);
+  transform-origin: top;
+  transform: rotateX(0deg);
+  transition: transform 0.7s cubic-bezier(0.6, 0.05, 0.3, 1) 0.5s, z-index 0s linear 0.6s;
+  z-index: 4;
+  border-radius: 6px 6px 0 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14px;
+}
+.envelope .env-seal {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff7c2, var(--gold) 70%);
+  color: oklch(0.35 0.04 60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 10px oklch(0.3 0.02 60 / 0.3), 0 0 0 2px oklch(1 0 0 / 0.4) inset;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+.envelope.is-open .env-flap {
+  transform: rotateX(180deg);
+  z-index: 1;
+  transition: transform 0.7s cubic-bezier(0.6, 0.05, 0.3, 1), z-index 0s linear 0.35s;
+}
+.envelope.is-open .env-seal { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+.envelope .env-letter {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 12%;
+  background: #fffdf6;
+  border-radius: 4px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 8px 20px oklch(0.3 0.02 60 / 0.15);
+  text-align: center;
+  z-index: 2;
+  transform: translateY(0) scale(0.96);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) 0.9s, opacity 0.5s ease 0.9s;
+  max-height: 78%;
+  overflow: auto;
+}
+.envelope.is-open .env-letter {
+  transform: translateY(-110%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (min-width: 768px) {
+  .envelope { width: 480px; height: 300px; }
+  .envelope .env-letter { padding: 28px 32px; }
+}
