@@ -365,24 +365,79 @@ const CORES = [
 
 function Cores() {
   const [active, setActive] = useState<number>(0);
+  const [bursts, setBursts] = useState<
+    { id: number; x: number; y: number; color: string; dots: { tx: number; ty: number; d: number }[] }[]
+  >([]);
   const current = CORES[active];
+
+  function pick(i: number, e: React.MouseEvent<HTMLButtonElement>) {
+    setActive(i);
+    const stage = document.getElementById("cor-stage");
+    if (!stage) return;
+    const rect = stage.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const dots = Array.from({ length: 14 }).map(() => {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 80 + Math.random() * 180;
+      return {
+        tx: Math.cos(angle) * dist,
+        ty: Math.sin(angle) * dist,
+        d: 10 + Math.random() * 18,
+      };
+    });
+    const id = Date.now() + Math.random();
+    setBursts((b) => [...b, { id, x, y, color: CORES[i].value, dots }]);
+    setTimeout(() => setBursts((b) => b.filter((x) => x.id !== id)), 1000);
+  }
+
   return (
     <Section id="cores" eyebrow="capítulo 4" title="As cores da sua personalidade">
       <p className="text-lg text-muted-foreground max-w-2xl">
-        Toque em um pote de tinta — o papel se pinta com ele.
+        Toque em um pote de tinta — e veja o papel se pintar.
       </p>
 
       <div
-        className="color-stage mt-8 paper-card p-6 md:p-10 min-h-[220px] flex flex-col items-center justify-center text-center"
+        id="cor-stage"
+        className="color-stage relative mt-8 paper-card p-6 md:p-10 min-h-[260px] flex flex-col items-center justify-center text-center overflow-hidden"
         style={{ backgroundColor: `color-mix(in oklab, ${current.value} 35%, var(--color-card))` }}
       >
-        <p key={current.name} className="hand text-4xl md:text-5xl text-foreground drop-in">
+        {bursts.map((b) => (
+          <span key={b.id} style={{ position: "absolute", left: b.x, top: b.y }} aria-hidden>
+            <span
+              className="ripple"
+              style={{
+                left: -15,
+                top: -15,
+                background: `color-mix(in oklab, ${b.color} 60%, transparent)`,
+              }}
+            />
+            {b.dots.map((d, i) => (
+              <span
+                key={i}
+                className="splash-dot"
+                style={
+                  {
+                    left: -d.d / 2,
+                    top: -d.d / 2,
+                    width: d.d,
+                    height: d.d,
+                    background: b.color,
+                    ["--tx" as string]: `${d.tx}px`,
+                    ["--ty" as string]: `${d.ty}px`,
+                  } as React.CSSProperties
+                }
+              />
+            ))}
+          </span>
+        ))}
+        <p key={current.name} className="hand text-4xl md:text-5xl text-foreground drop-in relative">
           {current.name}
         </p>
-        <p key={current.phrase} className="mt-3 text-foreground/80 max-w-xl drop-in">
+        <p key={current.phrase} className="mt-3 text-foreground/80 max-w-xl drop-in relative">
           {current.phrase}
         </p>
-        <p className="mt-2 text-sm text-muted-foreground">{current.meaning}</p>
+        <p className="mt-2 text-sm text-muted-foreground relative">{current.meaning}</p>
       </div>
 
       <ul className="mt-6 grid grid-cols-5 gap-3">
@@ -391,7 +446,7 @@ function Cores() {
           return (
             <li key={c.name}>
               <button
-                onClick={() => setActive(i)}
+                onClick={(e) => pick(i, e)}
                 aria-label={`Cor: ${c.name}`}
                 aria-pressed={isActive}
                 className={`group w-full flex flex-col items-center gap-2 transition-transform ${
@@ -420,33 +475,104 @@ function Cores() {
   );
 }
 
-const AVENTURAS = [
-  { icon: "🚶", t: "Passeios", d: "andar sem destino, só por andar." },
-  { icon: "💬", t: "Conversas longas", d: "daquelas que viram noite sem perceber." },
-  { icon: "🗺️", t: "Planos simples", d: "porque o simples também é bonito." },
-  { icon: "✨", t: "Aventuras inesperadas", d: "as melhores não se planejam." },
+type Polaroid = {
+  t: string;
+  d: string;
+  message: string;
+  img?: string;
+  rotate: number;
+};
+
+const AVENTURAS: Polaroid[] = [
+  {
+    t: "Passeios",
+    d: "andar sem destino, só por andar.",
+    message: "se um dia a gente sair andando à toa, prometo guardar essa foto pra sempre.",
+    rotate: -3,
+  },
+  {
+    t: "Conversas longas",
+    d: "daquelas que viram noite sem perceber.",
+    message: "tem conversa sua que eu queria pausar e ouvir de novo.",
+    rotate: 2,
+  },
+  {
+    t: "Planos simples",
+    d: "porque o simples também é bonito.",
+    message: "um café, uma janela, um silêncio bom — já é aventura.",
+    rotate: -2,
+  },
+  {
+    t: "Aventuras inesperadas",
+    d: "as melhores não se planejam.",
+    message: "se um dia rolar uma dessas com você, eu topo de olhos fechados.",
+    rotate: 4,
+  },
 ];
 
 function Aventuras() {
+  const [open, setOpen] = useState<number | null>(null);
+
   return (
     <Section id="aventuras" eyebrow="capítulo 5" title="Nossas aventuras meio loucas">
-      <ul className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
-        {AVENTURAS.map((a) => (
-          <li key={a.t} className="paper-card p-5 text-center">
-            <div className="text-3xl" aria-hidden>
-              {a.icon}
-            </div>
-            <h3 className="mt-2 text-lg text-foreground">{a.t}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{a.d}</p>
-          </li>
-        ))}
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Quatro polaroides — algumas ainda esperando uma foto sua, nossa, ou de alguma memória.
+        Toque para virar.
+      </p>
+
+      <ul className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+        {AVENTURAS.map((p, i) => {
+          const isOpen = open === i;
+          return (
+            <li
+              key={p.t}
+              style={{ transform: `rotate(${isOpen ? 0 : p.rotate}deg)`, transition: "transform 0.5s" }}
+            >
+              <button
+                onClick={() => setOpen(isOpen ? null : i)}
+                aria-expanded={isOpen}
+                aria-label={`Polaroide: ${p.t}`}
+                className="polaroid w-full block text-left relative"
+              >
+                <span className="tape" aria-hidden />
+                <div className={`polaroid-frame ${p.img ? "" : "empty"}`}>
+                  {p.img ? (
+                    <img src={p.img} alt={p.t} />
+                  ) : (
+                    <span className="hand text-lg text-muted-foreground px-3 text-center">
+                      bote a imagem aqui ✦
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 px-1">
+                  <p className="hand text-2xl text-foreground leading-tight">{p.t}</p>
+                  <p className="text-xs text-muted-foreground">{p.d}</p>
+                </div>
+                {isOpen && (
+                  <p className="hand text-base text-[var(--gold)] px-1 mt-2 fade-up">
+                    “{p.message}”
+                  </p>
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
+
+      <p className="mt-8 text-sm text-muted-foreground text-center max-w-2xl mx-auto">
+        <span className="hand text-lg text-foreground">dica:</span> para trocar uma foto, abra
+        <code className="mx-1 px-1.5 py-0.5 rounded bg-muted text-foreground text-xs">src/routes/index.tsx</code>
+        e adicione <code className="mx-1 px-1.5 py-0.5 rounded bg-muted text-foreground text-xs">img: "/caminho-da-foto.jpg"</code>
+        em qualquer polaroide.
+      </p>
+
       <blockquote className="hand text-2xl md:text-3xl text-center mt-10 text-foreground max-w-3xl mx-auto">
         “Uma das coisas mais legais é encontrar alguém que também aceita embarcar em aventuras inesperadas.”
       </blockquote>
     </Section>
   );
 }
+
 
 const FE: { v: string; verse: string; ref: string }[] = [
   { v: "Amor ao próximo", verse: "Amarás o teu próximo como a ti mesmo.", ref: "Mateus 22:39" },
