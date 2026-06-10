@@ -965,26 +965,52 @@ function Sonhos() {
 
 
 function Carta() {
+  const [open, setOpen] = useState(false);
   return (
     <Section id="carta" eyebrow="capítulo 9" title="Uma carta para você">
-      <article className="paper-card p-8 md:p-12 max-w-3xl mx-auto">
-        <p className="hand text-2xl text-[var(--gold)]">Oi,</p>
-        <div className="mt-4 space-y-4 text-lg leading-relaxed text-foreground">
-          <p>
-            Eu não sei exatamente como começar — então começo do jeito mais honesto que conheço:
-            admirando você.
-          </p>
-          <p>
-            Admiro o jeito que você se importa com as pessoas, o modo como você encara as coisas
-            simples, e essa coragem silenciosa de seguir tentando, mesmo quando parece difícil.
-          </p>
-          <p>
-            Esse pequeno lugar não é um pedido. É só um cuidado em forma de site — um jeito de
-            dizer que você é especial, sem pressa, sem peso. Só com carinho.
-          </p>
-          <p className="hand text-2xl text-foreground">— com carinho.</p>
-        </div>
-      </article>
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Tem um envelope aqui embaixo — toque para abrir.
+      </p>
+
+      <div className="mt-10 flex justify-center">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          aria-label={open ? "Fechar carta" : "Abrir carta"}
+          className={`envelope ${open ? "is-open" : ""}`}
+        >
+          <div className="env-back" aria-hidden />
+          <div className="env-letter" aria-hidden={!open}>
+            <p className="hand text-2xl text-[var(--gold)]">Oi,</p>
+            <div className="mt-3 space-y-3 text-[15px] md:text-base leading-relaxed text-foreground text-left">
+              <p>
+                Eu não sei exatamente como começar — então começo do jeito mais honesto que
+                conheço: admirando você.
+              </p>
+              <p>
+                Admiro o jeito que você se importa com as pessoas, o modo como você encara as
+                coisas simples, e essa coragem silenciosa de seguir tentando, mesmo quando parece
+                difícil.
+              </p>
+              <p>
+                Esse pequeno lugar não é um pedido. É só um cuidado em forma de site — um jeito
+                de dizer que você é especial, sem pressa, sem peso. Só com carinho.
+              </p>
+              <p className="hand text-2xl text-foreground">— com carinho.</p>
+            </div>
+          </div>
+          <div className="env-front" aria-hidden />
+          <div className="env-flap" aria-hidden>
+            <div className="env-seal">✦</div>
+          </div>
+        </button>
+      </div>
+
+      {!open && (
+        <p className="hand text-center text-xl text-muted-foreground mt-6">
+          toque no envelope ↑
+        </p>
+      )}
     </Section>
   );
 }
