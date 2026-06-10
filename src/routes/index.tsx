@@ -615,28 +615,99 @@ function Cacada() {
 }
 
 const SONHOS = [
-  "Sonho em continuar crescendo.",
-  "Sonho em viver aventuras.",
-  "Sonho em construir uma vida guiada por bons valores.",
-  "Sonho em encontrar alguém que queira caminhar na mesma direção.",
+  "Continuar crescendo, devagar e com calma.",
+  "Viver aventuras — das grandes e das pequenas.",
+  "Construir uma vida guiada por bons valores.",
+  "Encontrar alguém que queira caminhar na mesma direção.",
 ];
 
 function Sonhos() {
+  const [revealed, setRevealed] = useState<number>(-1);
+  const [extra, setExtra] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
+
   return (
     <Section id="sonhos" eyebrow="capítulo 8" title="Sonhos e futuros possíveis">
       <p className="text-lg text-muted-foreground max-w-2xl">
-        São desejos. Não promessas. Mas talvez seja por aí que tudo começa.
+        Toque em cada estrela para revelar um sonho. No fim, deixe um seu também.
       </p>
-      <ul className="mt-8 space-y-3 max-w-2xl">
-        {SONHOS.map((s) => (
-          <li key={s} className="paper-card p-5 hand text-2xl text-foreground">
-            {s}
-          </li>
-        ))}
-      </ul>
+
+      <ol className="mt-8 space-y-3 max-w-2xl">
+        {SONHOS.map((s, i) => {
+          const open = i <= revealed;
+          return (
+            <li key={s} className="paper-card p-5">
+              <button
+                onClick={() => setRevealed((r) => Math.max(r, i))}
+                className="w-full text-left flex items-start gap-3"
+                aria-expanded={open}
+              >
+                <span
+                  className={`text-2xl transition-transform ${open ? "text-[var(--gold)] rotate-0 scale-110" : "text-muted-foreground"}`}
+                  aria-hidden
+                >
+                  ✦
+                </span>
+                {open ? (
+                  <span key={s} className="hand text-2xl text-foreground typewriter">
+                    {s}
+                  </span>
+                ) : (
+                  <span className="hand text-2xl text-muted-foreground">
+                    sonho número {i + 1} — toque para revelar
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
+      {revealed >= SONHOS.length - 1 && (
+        <div className="mt-8 paper-card p-5 max-w-2xl fade-up">
+          <p className="text-sm text-muted-foreground mb-2">
+            E se você quisesse acrescentar um sonho seu aqui?
+          </p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const t = draft.trim();
+              if (!t) return;
+              setExtra((x) => [...x, t]);
+              setDraft("");
+            }}
+            className="flex gap-2"
+          >
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="escreva um sonho…"
+              aria-label="Seu sonho"
+              className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-base text-foreground focus:outline-none focus:border-[var(--gold)] transition-colors"
+              maxLength={120}
+            />
+            <button
+              type="submit"
+              className="rounded-md border border-[var(--gold)] bg-card px-4 py-2 text-sm text-foreground hover:bg-[var(--gold)] hover:text-primary-foreground transition-colors"
+            >
+              guardar
+            </button>
+          </form>
+          {extra.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {extra.map((e, i) => (
+                <li key={i} className="hand text-xl text-foreground fade-up flex items-center gap-2">
+                  <span className="text-[var(--gold)]" aria-hidden>✦</span> {e}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </Section>
   );
 }
+
 
 function Carta() {
   return (
