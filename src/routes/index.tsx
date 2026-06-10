@@ -167,6 +167,8 @@ function Section({
 }
 
 function Hero() {
+  // troque a URL abaixo por uma foto dela: ex. "/foto-dela.jpg"
+  const heroPhoto: string | undefined = undefined;
   return (
     <section
       id="inicio"
@@ -176,9 +178,22 @@ function Hero() {
       <div className="starry absolute inset-0 opacity-70 pointer-events-none" aria-hidden />
       <div className="relative text-center max-w-3xl fade-up">
         <p className="hand text-3xl text-[var(--gold)] twinkle">para você</p>
+
+        <div className="mt-8 flex justify-center">
+          <div className="photo-frame">
+            {heroPhoto ? (
+              <img src={heroPhoto} alt="ela" />
+            ) : (
+              <span className="hand text-base md:text-lg text-muted-foreground text-center px-4 leading-tight">
+                bote a foto<br />dela aqui ✦
+              </span>
+            )}
+          </div>
+        </div>
+
         <h1
           id="inicio-title"
-          className="mt-4 text-4xl md:text-6xl font-medium leading-tight text-foreground"
+          className="mt-8 text-4xl md:text-6xl font-medium leading-tight text-foreground"
         >
           Algumas pessoas passam pela nossa vida.
           <br />
