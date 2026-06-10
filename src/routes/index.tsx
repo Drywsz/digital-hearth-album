@@ -356,30 +356,65 @@ function Admiro() {
 }
 
 const CORES = [
-  { name: "Verde", value: "var(--sage)", meaning: "Esperança" },
-  { name: "Amarelo", value: "var(--sun)", meaning: "Alegria" },
-  { name: "Azul", value: "var(--sky)", meaning: "Serenidade" },
-  { name: "Vermelho suave", value: "var(--rose)", meaning: "Carinho" },
-  { name: "Dourado", value: "var(--gold)", meaning: "Coragem para viver aventuras" },
+  { name: "Verde", value: "var(--sage)", meaning: "Esperança", phrase: "Como começo de manhã: silencioso, mas cheio de promessas." },
+  { name: "Amarelo", value: "var(--sun)", meaning: "Alegria", phrase: "Aquele riso fácil que aquece a tarde inteira." },
+  { name: "Azul", value: "var(--sky)", meaning: "Serenidade", phrase: "A calma de quem escuta sem pressa." },
+  { name: "Vermelho suave", value: "var(--rose)", meaning: "Carinho", phrase: "O afeto que aparece nos pequenos gestos." },
+  { name: "Dourado", value: "var(--gold)", meaning: "Coragem", phrase: "A luz de quem topa novas aventuras." },
 ];
 
 function Cores() {
+  const [active, setActive] = useState<number>(0);
+  const current = CORES[active];
   return (
     <Section id="cores" eyebrow="capítulo 4" title="As cores da sua personalidade">
-      <ul className="grid sm:grid-cols-2 md:grid-cols-5 gap-4">
-        {CORES.map((c) => (
-          <li key={c.name} className="paper-card overflow-hidden">
-            <div
-              className="h-28"
-              style={{ backgroundColor: c.value }}
-              aria-hidden
-            />
-            <div className="p-4">
-              <p className="hand text-2xl text-foreground">{c.name}</p>
-              <p className="text-muted-foreground text-sm mt-1">{c.meaning}</p>
-            </div>
-          </li>
-        ))}
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Toque em um pote de tinta — o papel se pinta com ele.
+      </p>
+
+      <div
+        className="color-stage mt-8 paper-card p-6 md:p-10 min-h-[220px] flex flex-col items-center justify-center text-center"
+        style={{ backgroundColor: `color-mix(in oklab, ${current.value} 35%, var(--color-card))` }}
+      >
+        <p key={current.name} className="hand text-4xl md:text-5xl text-foreground drop-in">
+          {current.name}
+        </p>
+        <p key={current.phrase} className="mt-3 text-foreground/80 max-w-xl drop-in">
+          {current.phrase}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{current.meaning}</p>
+      </div>
+
+      <ul className="mt-6 grid grid-cols-5 gap-3">
+        {CORES.map((c, i) => {
+          const isActive = i === active;
+          return (
+            <li key={c.name}>
+              <button
+                onClick={() => setActive(i)}
+                aria-label={`Cor: ${c.name}`}
+                aria-pressed={isActive}
+                className={`group w-full flex flex-col items-center gap-2 transition-transform ${
+                  isActive ? "-translate-y-1" : "hover:-translate-y-0.5"
+                }`}
+              >
+                <span
+                  className="block w-12 h-12 md:w-16 md:h-16 rounded-full transition-all"
+                  style={{
+                    backgroundColor: c.value,
+                    boxShadow: isActive
+                      ? `0 0 0 4px var(--color-card), 0 0 0 6px ${c.value}, 0 10px 24px oklch(0.3 0.02 60 / 0.18)`
+                      : "var(--shadow-soft)",
+                  }}
+                  aria-hidden
+                />
+                <span className={`text-xs ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                  {c.name}
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </Section>
   );
