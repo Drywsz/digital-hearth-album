@@ -448,23 +448,77 @@ function Aventuras() {
   );
 }
 
-const FE = ["Amor ao próximo", "Servir", "Bondade", "Esperança", "Caminhar com Deus"];
+const FE: { v: string; verse: string; ref: string }[] = [
+  { v: "Amor ao próximo", verse: "Amarás o teu próximo como a ti mesmo.", ref: "Mateus 22:39" },
+  { v: "Servir", verse: "Servi-vos uns aos outros pelo amor.", ref: "Gálatas 5:13" },
+  { v: "Bondade", verse: "Sede uns para com os outros benignos, misericordiosos.", ref: "Efésios 4:32" },
+  { v: "Esperança", verse: "A esperança não traz confusão.", ref: "Romanos 5:5" },
+  { v: "Caminhar com Deus", verse: "Ensina-me, Senhor, o teu caminho.", ref: "Salmos 27:11" },
+];
 
 function Fe() {
+  const [lit, setLit] = useState<Set<number>>(new Set());
+  const toggle = (i: number) =>
+    setLit((p) => {
+      const n = new Set(p);
+      n.has(i) ? n.delete(i) : n.add(i);
+      return n;
+    });
+  const all = lit.size === FE.length;
   return (
     <Section id="fe" eyebrow="capítulo 6" title="Nossa fé e os valores que compartilhamos">
-      <ul className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {FE.map((v) => (
-          <li key={v} className="paper-card px-3 py-5 text-center">
-            <span className="hand text-xl text-foreground">{v}</span>
-          </li>
-        ))}
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Acenda cada vela tocando nela — cada chama traz um pequeno versículo.
+      </p>
+      <ul className="mt-10 grid grid-cols-2 md:grid-cols-5 gap-4">
+        {FE.map((f, i) => {
+          const on = lit.has(i);
+          return (
+            <li key={f.v}>
+              <button
+                onClick={() => toggle(i)}
+                aria-pressed={on}
+                aria-label={`Acender vela: ${f.v}`}
+                className="paper-card w-full p-4 flex flex-col items-center gap-3 transition-transform hover:-translate-y-1"
+              >
+                <div className="relative h-16 flex items-end justify-center">
+                  {on && <div className="candle-flame absolute -top-1" aria-hidden />}
+                  <div
+                    className="w-3 h-12 rounded-sm"
+                    style={{
+                      background: "linear-gradient(180deg, #fff6e0, #efd9a8)",
+                      boxShadow: on ? "0 0 18px var(--gold)" : "none",
+                      transition: "box-shadow 0.4s ease",
+                    }}
+                    aria-hidden
+                  />
+                </div>
+                <span className="hand text-xl text-foreground">{f.v}</span>
+                {on && (
+                  <span className="text-xs text-muted-foreground italic fade-up">
+                    “{f.verse}” <br />
+                    <span className="not-italic">— {f.ref}</span>
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
-      <figure className="mt-10 paper-card p-6 md:p-10 max-w-3xl mx-auto text-center">
+      <figure
+        className={`mt-10 paper-card p-6 md:p-10 max-w-3xl mx-auto text-center transition-all ${
+          all ? "ring-2 ring-[var(--gold)]" : ""
+        }`}
+      >
         <blockquote className="text-xl md:text-2xl italic text-foreground leading-relaxed">
           “Acima de tudo, porém, revistam-se do amor, que é o vínculo perfeito.”
         </blockquote>
         <figcaption className="mt-3 text-sm text-muted-foreground">— Colossenses 3:14</figcaption>
+        {all && (
+          <p className="hand text-2xl mt-4 text-[var(--gold)] fade-up">
+            cinco chamas acesas — luz pequena, mas suficiente.
+          </p>
+        )}
       </figure>
     </Section>
   );
