@@ -1,29 +1,576 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Um pequeno mundo feito para você" },
+      {
+        name: "description",
+        content:
+          "Um diário digital artesanal — uma jornada delicada de admiração, valores e pequenas aventuras.",
+      },
+      { property: "og:title", content: "Um pequeno mundo feito para você" },
+      {
+        property: "og:description",
+        content: "Uma carta interativa, feita com carinho.",
+      },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+type SectionId =
+  | "inicio"
+  | "mundo"
+  | "voce"
+  | "admiro"
+  | "cores"
+  | "aventuras"
+  | "fe"
+  | "cacada"
+  | "sonhos"
+  | "carta"
+  | "final";
+
+const NAV: { id: SectionId; label: string }[] = [
+  { id: "inicio", label: "Início" },
+  { id: "mundo", label: "Um mundo" },
+  { id: "voce", label: "Quem você é" },
+  { id: "admiro", label: "Admiro" },
+  { id: "cores", label: "Cores" },
+  { id: "aventuras", label: "Aventuras" },
+  { id: "fe", label: "Fé" },
+  { id: "cacada", label: "Caça" },
+  { id: "sonhos", label: "Sonhos" },
+  { id: "carta", label: "Carta" },
+  { id: "final", label: "Final" },
+];
+
+function scrollTo(id: SectionId) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="relative">
+      <TopNav />
+      <Hero />
+      <Mundo />
+      <Voce />
+      <Admiro />
+      <Cores />
+      <Aventuras />
+      <Fe />
+      <Cacada />
+      <Sonhos />
+      <Carta />
+      <Final />
+      <footer className="py-10 text-center text-sm text-muted-foreground">
+        <p className="hand text-xl">feito à mão, com carinho</p>
+      </footer>
+    </main>
   );
 }
+
+function TopNav() {
+  const [open, setOpen] = useState(false);
+  return (
+    <nav
+      aria-label="Navegação principal"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/70 border-b border-border"
+    >
+      <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <button
+          onClick={() => scrollTo("inicio")}
+          className="hand text-2xl text-foreground hover:text-[var(--gold)] transition-colors"
+        >
+          ✦ diário
+        </button>
+        <button
+          aria-label="Abrir menu"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          className="md:hidden rounded-md border border-border px-3 py-1.5 text-sm"
+        >
+          {open ? "Fechar" : "Menu"}
+        </button>
+        <ul className="hidden md:flex items-center gap-5 text-sm">
+          {NAV.map((n) => (
+            <li key={n.id}>
+              <button
+                onClick={() => scrollTo(n.id)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {n.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {open && (
+        <ul className="md:hidden border-t border-border bg-background/95 px-4 py-3 grid grid-cols-2 gap-2 text-sm">
+          {NAV.map((n) => (
+            <li key={n.id}>
+              <button
+                onClick={() => {
+                  scrollTo(n.id);
+                  setOpen(false);
+                }}
+                className="w-full text-left rounded-md px-3 py-2 hover:bg-muted text-foreground"
+              >
+                {n.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </nav>
+  );
+}
+
+function Section({
+  id,
+  eyebrow,
+  title,
+  children,
+}: {
+  id: SectionId;
+  eyebrow?: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      className="scroll-mt-24 px-4 py-20 md:py-28"
+    >
+      <div className="mx-auto max-w-5xl">
+        {eyebrow && (
+          <p className="hand text-2xl text-[var(--gold)] mb-2">{eyebrow}</p>
+        )}
+        <h2
+          id={`${id}-title`}
+          className="text-3xl md:text-5xl font-medium tracking-tight text-foreground"
+        >
+          {title}
+        </h2>
+        <div className="deco-line my-6" />
+        <div className="fade-up">{children}</div>
+      </div>
+    </section>
+  );
+}
+
+function Hero() {
+  return (
+    <section
+      id="inicio"
+      aria-labelledby="inicio-title"
+      className="relative min-h-[100dvh] flex items-center justify-center px-4 pt-20"
+    >
+      <div className="starry absolute inset-0 opacity-70 pointer-events-none" aria-hidden />
+      <div className="relative text-center max-w-3xl fade-up">
+        <p className="hand text-3xl text-[var(--gold)] twinkle">para você</p>
+        <h1
+          id="inicio-title"
+          className="mt-4 text-4xl md:text-6xl font-medium leading-tight text-foreground"
+        >
+          Algumas pessoas passam pela nossa vida.
+          <br />
+          <span className="italic text-muted-foreground">Outras deixam marcas.</span>
+        </h1>
+        <p className="mt-6 text-lg text-muted-foreground">
+          Fiz esse pequeno lugar para guardar algumas delas.
+        </p>
+        <button
+          onClick={() => scrollTo("mundo")}
+          className="mt-10 inline-flex items-center gap-2 rounded-full border border-[var(--gold)] bg-card px-7 py-3 text-base text-foreground shadow-[var(--shadow-soft)] hover:bg-[var(--gold)] hover:text-primary-foreground transition-colors"
+        >
+          Entrar <span aria-hidden>→</span>
+        </button>
+        <div className="mt-16 float-soft text-[var(--gold)]" aria-hidden>
+          ✦
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const MUNDO_ITEMS = [
+  { icon: "🐍", label: "Cobra", note: "um símbolo que me lembra de você — e me faz sorrir." },
+  { icon: "🖌️", label: "Pincel", note: "porque você pinta o dia com pequenos gestos." },
+  { icon: "🏐", label: "Bola de vôlei", note: "o esporte, o time, a energia que você carrega." },
+  { icon: "🛤️", label: "Caminho", note: "um lembrete de que toda história é uma trilha." },
+  { icon: "✦", label: "Estrela", note: "porque algumas pessoas brilham sem perceber." },
+];
+
+function Mundo() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <Section id="mundo" eyebrow="capítulo 1" title="Um pequeno mundo feito para você">
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Cinco símbolos. Cada um guarda uma pequena lembrança — toque para descobrir.
+      </p>
+      <ul className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        {MUNDO_ITEMS.map((it, i) => {
+          const isOpen = open === i;
+          return (
+            <li key={it.label}>
+              <button
+                onClick={() => setOpen(isOpen ? null : i)}
+                aria-expanded={isOpen}
+                aria-label={`Revelar: ${it.label}`}
+                className="paper-card w-full aspect-square flex flex-col items-center justify-center gap-2 p-3 transition-transform hover:-translate-y-1"
+              >
+                <span className="text-4xl" aria-hidden>
+                  {it.icon}
+                </span>
+                <span className="text-sm text-muted-foreground">{it.label}</span>
+              </button>
+              {isOpen && (
+                <p className="hand text-xl mt-3 text-center text-foreground fade-up">
+                  {it.note}
+                </p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
+  );
+}
+
+const TRAITS = [
+  "Curiosa",
+  "Auxiliadora",
+  "Meiga",
+  "Atenciosa",
+  "Carinhosa",
+  "Alegre",
+  "Esforçada",
+  "Um pouco tímida",
+  "Sempre disposta a servir",
+  "Aceita aventuras inesperadas",
+  "Gosta de cuidar das pessoas",
+  "Não consegue ficar parada muito tempo",
+];
+
+function Voce() {
+  return (
+    <Section id="voce" eyebrow="capítulo 2" title="Quem você é">
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Um pequeno retrato — feito de gestos, e não só de palavras.
+      </p>
+      <ul className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {TRAITS.map((t) => (
+          <li
+            key={t}
+            className="paper-card px-4 py-5 text-center text-foreground hover:border-[var(--gold)] transition-colors"
+          >
+            <span className="hand text-xl">{t}</span>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+const ADMIRO = [
+  {
+    t: "Quando você escuta",
+    d: "de verdade — sem pressa, com os olhos atentos.",
+  },
+  {
+    t: "Quando você ajuda",
+    d: "como quem não busca nada em troca, só faz porque é quem é.",
+  },
+  {
+    t: "Quando você ri",
+    d: "do nada, de tudo, e o ambiente inteiro fica mais leve.",
+  },
+  {
+    t: "Quando você se importa",
+    d: "com detalhes pequenos que a maioria sequer enxerga.",
+  },
+  {
+    t: "Quando você não desiste",
+    d: "mesmo cansada, mesmo tímida, mesmo quando seria mais fácil parar.",
+  },
+  {
+    t: "Quando você é gentil",
+    d: "com quem não esperava ser tratado com gentileza.",
+  },
+];
+
+function Admiro() {
+  return (
+    <Section id="admiro" eyebrow="capítulo 3" title="As pequenas coisas que admiro">
+      <div className="grid md:grid-cols-2 gap-5">
+        {ADMIRO.map((a) => (
+          <article key={a.t} className="paper-card p-6">
+            <h3 className="text-xl text-foreground">{a.t}</h3>
+            <p className="mt-2 text-muted-foreground leading-relaxed">{a.d}</p>
+          </article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+const CORES = [
+  { name: "Verde", value: "var(--sage)", meaning: "Esperança" },
+  { name: "Amarelo", value: "var(--sun)", meaning: "Alegria" },
+  { name: "Azul", value: "var(--sky)", meaning: "Serenidade" },
+  { name: "Vermelho suave", value: "var(--rose)", meaning: "Carinho" },
+  { name: "Dourado", value: "var(--gold)", meaning: "Coragem para viver aventuras" },
+];
+
+function Cores() {
+  return (
+    <Section id="cores" eyebrow="capítulo 4" title="As cores da sua personalidade">
+      <ul className="grid sm:grid-cols-2 md:grid-cols-5 gap-4">
+        {CORES.map((c) => (
+          <li key={c.name} className="paper-card overflow-hidden">
+            <div
+              className="h-28"
+              style={{ backgroundColor: c.value }}
+              aria-hidden
+            />
+            <div className="p-4">
+              <p className="hand text-2xl text-foreground">{c.name}</p>
+              <p className="text-muted-foreground text-sm mt-1">{c.meaning}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+const AVENTURAS = [
+  { icon: "🚶", t: "Passeios", d: "andar sem destino, só por andar." },
+  { icon: "💬", t: "Conversas longas", d: "daquelas que viram noite sem perceber." },
+  { icon: "🗺️", t: "Planos simples", d: "porque o simples também é bonito." },
+  { icon: "✨", t: "Aventuras inesperadas", d: "as melhores não se planejam." },
+];
+
+function Aventuras() {
+  return (
+    <Section id="aventuras" eyebrow="capítulo 5" title="Nossas aventuras meio loucas">
+      <ul className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {AVENTURAS.map((a) => (
+          <li key={a.t} className="paper-card p-5 text-center">
+            <div className="text-3xl" aria-hidden>
+              {a.icon}
+            </div>
+            <h3 className="mt-2 text-lg text-foreground">{a.t}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{a.d}</p>
+          </li>
+        ))}
+      </ul>
+      <blockquote className="hand text-2xl md:text-3xl text-center mt-10 text-foreground max-w-3xl mx-auto">
+        “Uma das coisas mais legais é encontrar alguém que também aceita embarcar em aventuras inesperadas.”
+      </blockquote>
+    </Section>
+  );
+}
+
+const FE = ["Amor ao próximo", "Servir", "Bondade", "Esperança", "Caminhar com Deus"];
+
+function Fe() {
+  return (
+    <Section id="fe" eyebrow="capítulo 6" title="Nossa fé e os valores que compartilhamos">
+      <ul className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {FE.map((v) => (
+          <li key={v} className="paper-card px-3 py-5 text-center">
+            <span className="hand text-xl text-foreground">{v}</span>
+          </li>
+        ))}
+      </ul>
+      <figure className="mt-10 paper-card p-6 md:p-10 max-w-3xl mx-auto text-center">
+        <blockquote className="text-xl md:text-2xl italic text-foreground leading-relaxed">
+          “Acima de tudo, porém, revistam-se do amor, que é o vínculo perfeito.”
+        </blockquote>
+        <figcaption className="mt-3 text-sm text-muted-foreground">— Colossenses 3:14</figcaption>
+      </figure>
+    </Section>
+  );
+}
+
+const TESOUROS = ["🐍", "🖌️", "🏐", "✦"];
+const TESOUROS_LABEL: Record<string, string> = {
+  "🐍": "Cobra",
+  "🖌️": "Pincel",
+  "🏐": "Bola de vôlei",
+  "✦": "Estrela",
+};
+
+function Cacada() {
+  const [found, setFound] = useState<string[]>([]);
+
+  // Hide treasures at deterministic spots
+  const spots = useMemo(
+    () => [
+      { icon: "🐍", top: "12%", left: "8%" },
+      { icon: "🖌️", top: "68%", left: "82%" },
+      { icon: "🏐", top: "78%", left: "18%" },
+      { icon: "✦", top: "22%", left: "78%" },
+    ],
+    [],
+  );
+
+  const complete = found.length === TESOUROS.length;
+
+  function pick(icon: string) {
+    setFound((f) => (f.includes(icon) ? f : [...f, icon]));
+  }
+
+  return (
+    <Section id="cacada" eyebrow="capítulo 7" title="Pequenas missões e caça ao tesouro">
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Quatro tesouros estão escondidos no pergaminho abaixo. Encontre todos para revelar uma
+        mensagem.
+      </p>
+
+      <div className="mt-8 flex flex-wrap gap-3" aria-live="polite">
+        {TESOUROS.map((t) => {
+          const got = found.includes(t);
+          return (
+            <span
+              key={t}
+              className={`paper-card px-4 py-2 text-sm ${
+                got ? "text-foreground" : "text-muted-foreground opacity-60"
+              }`}
+            >
+              <span aria-hidden className="mr-1">
+                {got ? t : "·"}
+              </span>
+              {TESOUROS_LABEL[t]}
+            </span>
+          );
+        })}
+      </div>
+
+      <div
+        className="relative mt-8 paper-card overflow-hidden"
+        style={{ height: 360 }}
+        aria-label="Área de caça ao tesouro"
+      >
+        <div className="starry absolute inset-0 opacity-50" aria-hidden />
+        {spots.map((s) => {
+          const got = found.includes(s.icon);
+          return (
+            <button
+              key={s.icon}
+              onClick={() => pick(s.icon)}
+              aria-label={`Tesouro: ${TESOUROS_LABEL[s.icon]}`}
+              disabled={got}
+              className={`absolute text-2xl md:text-3xl transition-all ${
+                got ? "opacity-100 scale-110 cursor-default" : "opacity-50 hover:opacity-100 hover:scale-125"
+              }`}
+              style={{ top: s.top, left: s.left }}
+            >
+              {s.icon}
+            </button>
+          );
+        })}
+        {complete && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/85 backdrop-blur-sm fade-up p-6">
+            <p className="hand text-2xl md:text-3xl text-center max-w-xl text-foreground">
+              Você encontrou todos. Talvez seja assim mesmo — quem procura com cuidado, encontra
+              tesouros pequenos por toda parte.
+            </p>
+          </div>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+const SONHOS = [
+  "Sonho em continuar crescendo.",
+  "Sonho em viver aventuras.",
+  "Sonho em construir uma vida guiada por bons valores.",
+  "Sonho em encontrar alguém que queira caminhar na mesma direção.",
+];
+
+function Sonhos() {
+  return (
+    <Section id="sonhos" eyebrow="capítulo 8" title="Sonhos e futuros possíveis">
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        São desejos. Não promessas. Mas talvez seja por aí que tudo começa.
+      </p>
+      <ul className="mt-8 space-y-3 max-w-2xl">
+        {SONHOS.map((s) => (
+          <li key={s} className="paper-card p-5 hand text-2xl text-foreground">
+            {s}
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+function Carta() {
+  return (
+    <Section id="carta" eyebrow="capítulo 9" title="Uma carta para você">
+      <article className="paper-card p-8 md:p-12 max-w-3xl mx-auto">
+        <p className="hand text-2xl text-[var(--gold)]">Oi,</p>
+        <div className="mt-4 space-y-4 text-lg leading-relaxed text-foreground">
+          <p>
+            Eu não sei exatamente como começar — então começo do jeito mais honesto que conheço:
+            admirando você.
+          </p>
+          <p>
+            Admiro o jeito que você se importa com as pessoas, o modo como você encara as coisas
+            simples, e essa coragem silenciosa de seguir tentando, mesmo quando parece difícil.
+          </p>
+          <p>
+            Esse pequeno lugar não é um pedido. É só um cuidado em forma de site — um jeito de
+            dizer que você é especial, sem pressa, sem peso. Só com carinho.
+          </p>
+          <p className="hand text-2xl text-foreground">— com carinho.</p>
+        </div>
+      </article>
+    </Section>
+  );
+}
+
+function Final() {
+  const [revealed, setRevealed] = useState(false);
+  return (
+    <section
+      id="final"
+      aria-labelledby="final-title"
+      className="scroll-mt-24 min-h-[80dvh] flex items-center justify-center px-4 py-20"
+    >
+      <div className="text-center max-w-2xl fade-up">
+        <h2
+          id="final-title"
+          className="text-3xl md:text-5xl font-medium text-foreground leading-tight"
+        >
+          “As melhores histórias não são escritas por uma pessoa só.”
+        </h2>
+        {!revealed ? (
+          <button
+            onClick={() => setRevealed(true)}
+            className="mt-10 inline-flex items-center gap-2 rounded-full border border-[var(--gold)] bg-card px-7 py-3 text-base text-foreground shadow-[var(--shadow-soft)] hover:bg-[var(--gold)] hover:text-primary-foreground transition-colors"
+          >
+            Continuar… <span aria-hidden>→</span>
+          </button>
+        ) : (
+          <p className="hand text-2xl md:text-3xl mt-10 text-foreground fade-up">
+            A próxima parte dessa história não está neste site. Ela acontece em uma conversa,
+            quando chegar o momento certo.
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// Suppress unused import warning if any
+void useEffect;
