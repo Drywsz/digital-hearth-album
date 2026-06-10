@@ -313,47 +313,151 @@ function Voce() {
   );
 }
 
-const ADMIRO = [
-  {
-    t: "Quando você escuta",
-    d: "de verdade — sem pressa, com os olhos atentos.",
-  },
-  {
-    t: "Quando você ajuda",
-    d: "como quem não busca nada em troca, só faz porque é quem é.",
-  },
-  {
-    t: "Quando você ri",
-    d: "do nada, de tudo, e o ambiente inteiro fica mais leve.",
-  },
-  {
-    t: "Quando você se importa",
-    d: "com detalhes pequenos que a maioria sequer enxerga.",
-  },
-  {
-    t: "Quando você não desiste",
-    d: "mesmo cansada, mesmo tímida, mesmo quando seria mais fácil parar.",
-  },
-  {
-    t: "Quando você é gentil",
-    d: "com quem não esperava ser tratado com gentileza.",
-  },
+type Admiracao = {
+  t: string;
+  d: string;
+  x: number; // % position in sky
+  y: number;
+};
+
+const ADMIRO: Admiracao[] = [
+  { t: "Quando você escuta", d: "de verdade — sem pressa, com os olhos atentos.", x: 14, y: 30 },
+  { t: "Quando você ajuda", d: "como quem não busca nada em troca, só faz porque é quem é.", x: 32, y: 68 },
+  { t: "Quando você ri", d: "do nada, de tudo, e o ambiente inteiro fica mais leve.", x: 48, y: 22 },
+  { t: "Quando você se importa", d: "com detalhes pequenos que a maioria sequer enxerga.", x: 62, y: 56 },
+  { t: "Quando você não desiste", d: "mesmo cansada, mesmo tímida, mesmo quando seria mais fácil parar.", x: 80, y: 34 },
+  { t: "Quando você é gentil", d: "com quem não esperava ser tratado com gentileza.", x: 88, y: 72 },
 ];
 
 function Admiro() {
+  const [order, setOrder] = useState<number[]>([]);
+  const last = order[order.length - 1];
+  const current = last !== undefined ? ADMIRO[last] : null;
+  const complete = order.length === ADMIRO.length;
+
+  function tap(i: number) {
+    setOrder((o) => (o.includes(i) ? o : [...o, i]));
+  }
+  function reset() {
+    setOrder([]);
+  }
+
+  // SVG lines between consecutive lit stars
+  const lines = order.slice(1).map((idx, k) => {
+    const a = ADMIRO[order[k]];
+    const b = ADMIRO[idx];
+    return { x1: a.x, y1: a.y, x2: b.x, y2: b.y, key: `${order[k]}-${idx}` };
+  });
+
   return (
     <Section id="admiro" eyebrow="capítulo 3" title="As pequenas coisas que admiro">
-      <div className="grid md:grid-cols-2 gap-5">
-        {ADMIRO.map((a) => (
-          <article key={a.t} className="paper-card p-6">
-            <h3 className="text-xl text-foreground">{a.t}</h3>
-            <p className="mt-2 text-muted-foreground leading-relaxed">{a.d}</p>
-          </article>
-        ))}
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Cada estrela é uma coisa que admiro em você. Toque uma por vez — e veja a constelação
+        se formando.
+      </p>
+
+      <div
+        className="constellation relative mt-8 paper-card overflow-hidden"
+        style={{ height: 360 }}
+        aria-label="Constelação de admirações"
+      >
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden
+        >
+          {lines.map((l) => (
+            <line
+              key={l.key}
+              className="constellation-line"
+              x1={l.x1}
+              y1={l.y1}
+              x2={l.x2}
+              y2={l.y2}
+              vectorEffect="non-scaling-stroke"
+            />
+          ))}
+        </svg>
+
+        {ADMIRO.map((a, i) => {
+          const lit = order.includes(i);
+          return (
+            <button
+              key={a.t}
+              onClick={() => tap(i)}
+              aria-pressed={lit}
+              aria-label={a.t}
+              className={`star-btn ${lit ? "lit" : ""}`}
+              style={{
+                left: `calc(${a.x}% - 18px)`,
+                top: `calc(${a.y}% - 18px)`,
+              }}
+            >
+              <svg className="star-svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 2l2.6 6.6L21 9.5l-5 4.6 1.4 6.9L12 17.8 6.6 21 8 14.1 3 9.5l6.4-.9z" />
+              </svg>
+            </button>
+          );
+        })}
+
+        {/* Floating message */}
+        {current && !complete && (
+          <div
+            key={current.t}
+            className="absolute left-4 right-4 bottom-4 paper-card p-4 fade-up max-w-md md:right-auto md:max-w-sm"
+          >
+            <p className="hand text-2xl text-foreground leading-tight">{current.t}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{current.d}</p>
+          </div>
+        )}
+
+        {complete && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/85 backdrop-blur-sm fade-up p-6">
+            <div className="text-center max-w-xl">
+              <p className="hand text-3xl md:text-4xl text-[var(--gold)]">a constelação</p>
+              <p className="mt-3 text-foreground text-lg leading-relaxed">
+                Cada estrelinha é pequena sozinha. Juntas, viram uma constelação inteira — e é
+                mais ou menos assim que eu te enxergo.
+              </p>
+            </div>
+          </div>
+        )}
       </div>
+
+      <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+        <span>{order.length} de {ADMIRO.length} estrelas acesas</span>
+        {order.length > 0 && (
+          <button
+            onClick={reset}
+            className="underline-offset-4 hover:underline hover:text-foreground transition-colors"
+          >
+            recomeçar
+          </button>
+        )}
+      </div>
+
+      {/* Quiet list below for accessibility / completeness */}
+      <ul className="mt-10 grid md:grid-cols-2 gap-3">
+        {ADMIRO.map((a, i) => {
+          const lit = order.includes(i);
+          return (
+            <li
+              key={a.t}
+              className={`paper-card p-4 transition-all ${
+                lit ? "border-[var(--gold)]" : "opacity-70"
+              }`}
+            >
+              <p className="hand text-xl text-foreground">{a.t}</p>
+              <p className="text-sm text-muted-foreground mt-1">{a.d}</p>
+            </li>
+          );
+        })}
+      </ul>
     </Section>
   );
 }
+
 
 const CORES = [
   { name: "Verde", value: "var(--sage)", meaning: "Esperança", phrase: "Como começo de manhã: silencioso, mas cheio de promessas." },
