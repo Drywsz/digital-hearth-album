@@ -134,3 +134,110 @@
   to { opacity: 1; transform: translateY(0); }
 }
 .fade-up { animation: fade-up 0.8s ease-out both; }
+
+/* ---------- Flip cards (Capítulo 2) ---------- */
+.flip {
+  perspective: 1000px;
+}
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  transform-style: preserve-3d;
+}
+.flip.is-flipped .flip-inner { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  border-radius: var(--radius-lg);
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* ---------- Animated menu button ---------- */
+.menu-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.menu-btn:hover {
+  transform: rotate(-6deg) scale(1.05);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px oklch(0.78 0.11 85 / 0.15), var(--shadow-soft);
+}
+.menu-btn .bar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: var(--color-foreground);
+  border-radius: 2px;
+  transition: transform 0.4s cubic-bezier(0.6, 0.05, 0.3, 1.4), opacity 0.3s ease, top 0.3s ease;
+}
+.menu-btn .bar.b1 { top: 14px; }
+.menu-btn .bar.b2 { top: 21px; }
+.menu-btn .bar.b3 { top: 28px; }
+.menu-btn.is-open .bar.b1 { top: 21px; transform: rotate(45deg); }
+.menu-btn.is-open .bar.b2 { opacity: 0; transform: scaleX(0); }
+.menu-btn.is-open .bar.b3 { top: 21px; transform: rotate(-45deg); }
+
+/* ---------- Color drop (Capítulo 4) ---------- */
+.color-stage {
+  transition: background-color 0.7s ease;
+}
+@keyframes drop-in {
+  0% { transform: translateY(-30px) scale(0.6); opacity: 0; }
+  60% { transform: translateY(4px) scale(1.05); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.drop-in { animation: drop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ---------- Candles / Fé ---------- */
+.candle-flame {
+  width: 14px;
+  height: 20px;
+  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+  background: radial-gradient(circle at 50% 70%, #fff7c2, var(--gold) 60%, transparent 80%);
+  filter: drop-shadow(0 0 8px var(--gold));
+  animation: flicker 1.6s infinite ease-in-out;
+  transform-origin: bottom center;
+}
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(-1deg); opacity: 0.95; }
+  50% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+}
+
+/* ---------- Typewriter (Sonhos) ---------- */
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--gold);
+  animation: type 2s steps(40, end) both, blink 0.8s step-end infinite;
+}
+@keyframes type { from { width: 0 } to { width: 100% } }
+@keyframes blink { 50% { border-color: transparent } }
+
+/* ---------- Progress dots ---------- */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-border);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.dot.on { background: var(--gold); transform: scale(1.3); }

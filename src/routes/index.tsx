@@ -89,19 +89,21 @@ function TopNav() {
           ✦ diário
         </button>
         <button
-          aria-label="Abrir menu"
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="md:hidden rounded-md border border-border px-3 py-1.5 text-sm"
+          className={`menu-btn md:hidden ${open ? "is-open" : ""}`}
         >
-          {open ? "Fechar" : "Menu"}
+          <span className="bar b1" />
+          <span className="bar b2" />
+          <span className="bar b3" />
         </button>
         <ul className="hidden md:flex items-center gap-5 text-sm">
           {NAV.map((n) => (
             <li key={n.id}>
               <button
                 onClick={() => scrollTo(n.id)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors story-link"
               >
                 {n.label}
               </button>
@@ -110,7 +112,7 @@ function TopNav() {
         </ul>
       </div>
       {open && (
-        <ul className="md:hidden border-t border-border bg-background/95 px-4 py-3 grid grid-cols-2 gap-2 text-sm">
+        <ul className="md:hidden border-t border-border bg-background/95 px-4 py-3 grid grid-cols-2 gap-2 text-sm animate-fade-in">
           {NAV.map((n) => (
             <li key={n.id}>
               <button
@@ -243,37 +245,70 @@ function Mundo() {
   );
 }
 
-const TRAITS = [
-  "Curiosa",
-  "Auxiliadora",
-  "Meiga",
-  "Atenciosa",
-  "Carinhosa",
-  "Alegre",
-  "Esforçada",
-  "Um pouco tímida",
-  "Sempre disposta a servir",
-  "Aceita aventuras inesperadas",
-  "Gosta de cuidar das pessoas",
-  "Não consegue ficar parada muito tempo",
+const TRAITS: { t: string; d: string; icon: string }[] = [
+  { t: "Curiosa", d: "sempre com uma pergunta nova guardada no bolso.", icon: "🔎" },
+  { t: "Auxiliadora", d: "aparece antes mesmo de pedirem ajuda.", icon: "🤝" },
+  { t: "Meiga", d: "tem um jeito que acalma o ambiente.", icon: "🌷" },
+  { t: "Atenciosa", d: "lembra dos detalhes que ninguém mais lembra.", icon: "📝" },
+  { t: "Carinhosa", d: "cuida em pequenos gestos diários.", icon: "💌" },
+  { t: "Alegre", d: "tem um riso que contagia até quem não sabia que precisava.", icon: "☀️" },
+  { t: "Esforçada", d: "insiste, mesmo quando seria mais fácil desistir.", icon: "🌱" },
+  { t: "Um pouco tímida", d: "e isso é parte do charme.", icon: "🌙" },
+  { t: "Servir", d: "ajuda como quem oferece um café quentinho.", icon: "🍵" },
+  { t: "Aventureira", d: "topa o inesperado quando vale a pena.", icon: "🧭" },
+  { t: "Cuidadora", d: "vê as pessoas — de verdade.", icon: "🫶" },
+  { t: "Inquieta", d: "raramente parada, sempre criando.", icon: "✨" },
 ];
 
 function Voce() {
+  const [flipped, setFlipped] = useState<Set<number>>(new Set());
+  const toggle = (i: number) =>
+    setFlipped((prev) => {
+      const n = new Set(prev);
+      n.has(i) ? n.delete(i) : n.add(i);
+      return n;
+    });
+  const progress = flipped.size;
   return (
     <Section id="voce" eyebrow="capítulo 2" title="Quem você é">
       <p className="text-lg text-muted-foreground max-w-2xl">
-        Um pequeno retrato — feito de gestos, e não só de palavras.
+        Um pequeno retrato — toque em cada carta para virá-la e ler o lado de dentro.
       </p>
-      <ul className="mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-        {TRAITS.map((t) => (
-          <li
-            key={t}
-            className="paper-card px-4 py-5 text-center text-foreground hover:border-[var(--gold)] transition-colors"
-          >
-            <span className="hand text-xl">{t}</span>
+      <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+        <span>{progress} de {TRAITS.length} reveladas</span>
+        <div className="flex gap-1.5 ml-2">
+          {TRAITS.map((_, i) => (
+            <span key={i} className={`dot ${flipped.has(i) ? "on" : ""}`} />
+          ))}
+        </div>
+      </div>
+      <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        {TRAITS.map((t, i) => (
+          <li key={t.t} className="flip" style={{ height: 140 }}>
+            <button
+              onClick={() => toggle(i)}
+              aria-label={`Virar carta: ${t.t}`}
+              aria-pressed={flipped.has(i)}
+              className={`flip ${flipped.has(i) ? "is-flipped" : ""} w-full h-full block`}
+            >
+              <div className="flip-inner">
+                <div className="flip-face paper-card flex-col gap-2">
+                  <span className="text-2xl" aria-hidden>{t.icon}</span>
+                  <span className="hand text-xl text-foreground">{t.t}</span>
+                </div>
+                <div className="flip-face flip-back paper-card" style={{ background: "var(--accent)" }}>
+                  <span className="text-sm text-foreground leading-snug">{t.d}</span>
+                </div>
+              </div>
+            </button>
           </li>
         ))}
       </ul>
+      {progress === TRAITS.length && (
+        <p className="hand text-2xl text-center mt-8 text-[var(--gold)] fade-up">
+          Doze cartas, um só retrato — e ainda assim, falta espaço pra tudo que você é.
+        </p>
+      )}
     </Section>
   );
 }
@@ -321,30 +356,65 @@ function Admiro() {
 }
 
 const CORES = [
-  { name: "Verde", value: "var(--sage)", meaning: "Esperança" },
-  { name: "Amarelo", value: "var(--sun)", meaning: "Alegria" },
-  { name: "Azul", value: "var(--sky)", meaning: "Serenidade" },
-  { name: "Vermelho suave", value: "var(--rose)", meaning: "Carinho" },
-  { name: "Dourado", value: "var(--gold)", meaning: "Coragem para viver aventuras" },
+  { name: "Verde", value: "var(--sage)", meaning: "Esperança", phrase: "Como começo de manhã: silencioso, mas cheio de promessas." },
+  { name: "Amarelo", value: "var(--sun)", meaning: "Alegria", phrase: "Aquele riso fácil que aquece a tarde inteira." },
+  { name: "Azul", value: "var(--sky)", meaning: "Serenidade", phrase: "A calma de quem escuta sem pressa." },
+  { name: "Vermelho suave", value: "var(--rose)", meaning: "Carinho", phrase: "O afeto que aparece nos pequenos gestos." },
+  { name: "Dourado", value: "var(--gold)", meaning: "Coragem", phrase: "A luz de quem topa novas aventuras." },
 ];
 
 function Cores() {
+  const [active, setActive] = useState<number>(0);
+  const current = CORES[active];
   return (
     <Section id="cores" eyebrow="capítulo 4" title="As cores da sua personalidade">
-      <ul className="grid sm:grid-cols-2 md:grid-cols-5 gap-4">
-        {CORES.map((c) => (
-          <li key={c.name} className="paper-card overflow-hidden">
-            <div
-              className="h-28"
-              style={{ backgroundColor: c.value }}
-              aria-hidden
-            />
-            <div className="p-4">
-              <p className="hand text-2xl text-foreground">{c.name}</p>
-              <p className="text-muted-foreground text-sm mt-1">{c.meaning}</p>
-            </div>
-          </li>
-        ))}
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Toque em um pote de tinta — o papel se pinta com ele.
+      </p>
+
+      <div
+        className="color-stage mt-8 paper-card p-6 md:p-10 min-h-[220px] flex flex-col items-center justify-center text-center"
+        style={{ backgroundColor: `color-mix(in oklab, ${current.value} 35%, var(--color-card))` }}
+      >
+        <p key={current.name} className="hand text-4xl md:text-5xl text-foreground drop-in">
+          {current.name}
+        </p>
+        <p key={current.phrase} className="mt-3 text-foreground/80 max-w-xl drop-in">
+          {current.phrase}
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{current.meaning}</p>
+      </div>
+
+      <ul className="mt-6 grid grid-cols-5 gap-3">
+        {CORES.map((c, i) => {
+          const isActive = i === active;
+          return (
+            <li key={c.name}>
+              <button
+                onClick={() => setActive(i)}
+                aria-label={`Cor: ${c.name}`}
+                aria-pressed={isActive}
+                className={`group w-full flex flex-col items-center gap-2 transition-transform ${
+                  isActive ? "-translate-y-1" : "hover:-translate-y-0.5"
+                }`}
+              >
+                <span
+                  className="block w-12 h-12 md:w-16 md:h-16 rounded-full transition-all"
+                  style={{
+                    backgroundColor: c.value,
+                    boxShadow: isActive
+                      ? `0 0 0 4px var(--color-card), 0 0 0 6px ${c.value}, 0 10px 24px oklch(0.3 0.02 60 / 0.18)`
+                      : "var(--shadow-soft)",
+                  }}
+                  aria-hidden
+                />
+                <span className={`text-xs ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                  {c.name}
+                </span>
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </Section>
   );
@@ -378,23 +448,77 @@ function Aventuras() {
   );
 }
 
-const FE = ["Amor ao próximo", "Servir", "Bondade", "Esperança", "Caminhar com Deus"];
+const FE: { v: string; verse: string; ref: string }[] = [
+  { v: "Amor ao próximo", verse: "Amarás o teu próximo como a ti mesmo.", ref: "Mateus 22:39" },
+  { v: "Servir", verse: "Servi-vos uns aos outros pelo amor.", ref: "Gálatas 5:13" },
+  { v: "Bondade", verse: "Sede uns para com os outros benignos, misericordiosos.", ref: "Efésios 4:32" },
+  { v: "Esperança", verse: "A esperança não traz confusão.", ref: "Romanos 5:5" },
+  { v: "Caminhar com Deus", verse: "Ensina-me, Senhor, o teu caminho.", ref: "Salmos 27:11" },
+];
 
 function Fe() {
+  const [lit, setLit] = useState<Set<number>>(new Set());
+  const toggle = (i: number) =>
+    setLit((p) => {
+      const n = new Set(p);
+      n.has(i) ? n.delete(i) : n.add(i);
+      return n;
+    });
+  const all = lit.size === FE.length;
   return (
     <Section id="fe" eyebrow="capítulo 6" title="Nossa fé e os valores que compartilhamos">
-      <ul className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {FE.map((v) => (
-          <li key={v} className="paper-card px-3 py-5 text-center">
-            <span className="hand text-xl text-foreground">{v}</span>
-          </li>
-        ))}
+      <p className="text-lg text-muted-foreground max-w-2xl">
+        Acenda cada vela tocando nela — cada chama traz um pequeno versículo.
+      </p>
+      <ul className="mt-10 grid grid-cols-2 md:grid-cols-5 gap-4">
+        {FE.map((f, i) => {
+          const on = lit.has(i);
+          return (
+            <li key={f.v}>
+              <button
+                onClick={() => toggle(i)}
+                aria-pressed={on}
+                aria-label={`Acender vela: ${f.v}`}
+                className="paper-card w-full p-4 flex flex-col items-center gap-3 transition-transform hover:-translate-y-1"
+              >
+                <div className="relative h-16 flex items-end justify-center">
+                  {on && <div className="candle-flame absolute -top-1" aria-hidden />}
+                  <div
+                    className="w-3 h-12 rounded-sm"
+                    style={{
+                      background: "linear-gradient(180deg, #fff6e0, #efd9a8)",
+                      boxShadow: on ? "0 0 18px var(--gold)" : "none",
+                      transition: "box-shadow 0.4s ease",
+                    }}
+                    aria-hidden
+                  />
+                </div>
+                <span className="hand text-xl text-foreground">{f.v}</span>
+                {on && (
+                  <span className="text-xs text-muted-foreground italic fade-up">
+                    “{f.verse}” <br />
+                    <span className="not-italic">— {f.ref}</span>
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
       </ul>
-      <figure className="mt-10 paper-card p-6 md:p-10 max-w-3xl mx-auto text-center">
+      <figure
+        className={`mt-10 paper-card p-6 md:p-10 max-w-3xl mx-auto text-center transition-all ${
+          all ? "ring-2 ring-[var(--gold)]" : ""
+        }`}
+      >
         <blockquote className="text-xl md:text-2xl italic text-foreground leading-relaxed">
           “Acima de tudo, porém, revistam-se do amor, que é o vínculo perfeito.”
         </blockquote>
         <figcaption className="mt-3 text-sm text-muted-foreground">— Colossenses 3:14</figcaption>
+        {all && (
+          <p className="hand text-2xl mt-4 text-[var(--gold)] fade-up">
+            cinco chamas acesas — luz pequena, mas suficiente.
+          </p>
+        )}
       </figure>
     </Section>
   );
@@ -491,28 +615,99 @@ function Cacada() {
 }
 
 const SONHOS = [
-  "Sonho em continuar crescendo.",
-  "Sonho em viver aventuras.",
-  "Sonho em construir uma vida guiada por bons valores.",
-  "Sonho em encontrar alguém que queira caminhar na mesma direção.",
+  "Continuar crescendo, devagar e com calma.",
+  "Viver aventuras — das grandes e das pequenas.",
+  "Construir uma vida guiada por bons valores.",
+  "Encontrar alguém que queira caminhar na mesma direção.",
 ];
 
 function Sonhos() {
+  const [revealed, setRevealed] = useState<number>(-1);
+  const [extra, setExtra] = useState<string[]>([]);
+  const [draft, setDraft] = useState("");
+
   return (
     <Section id="sonhos" eyebrow="capítulo 8" title="Sonhos e futuros possíveis">
       <p className="text-lg text-muted-foreground max-w-2xl">
-        São desejos. Não promessas. Mas talvez seja por aí que tudo começa.
+        Toque em cada estrela para revelar um sonho. No fim, deixe um seu também.
       </p>
-      <ul className="mt-8 space-y-3 max-w-2xl">
-        {SONHOS.map((s) => (
-          <li key={s} className="paper-card p-5 hand text-2xl text-foreground">
-            {s}
-          </li>
-        ))}
-      </ul>
+
+      <ol className="mt-8 space-y-3 max-w-2xl">
+        {SONHOS.map((s, i) => {
+          const open = i <= revealed;
+          return (
+            <li key={s} className="paper-card p-5">
+              <button
+                onClick={() => setRevealed((r) => Math.max(r, i))}
+                className="w-full text-left flex items-start gap-3"
+                aria-expanded={open}
+              >
+                <span
+                  className={`text-2xl transition-transform ${open ? "text-[var(--gold)] rotate-0 scale-110" : "text-muted-foreground"}`}
+                  aria-hidden
+                >
+                  ✦
+                </span>
+                {open ? (
+                  <span key={s} className="hand text-2xl text-foreground typewriter">
+                    {s}
+                  </span>
+                ) : (
+                  <span className="hand text-2xl text-muted-foreground">
+                    sonho número {i + 1} — toque para revelar
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
+      {revealed >= SONHOS.length - 1 && (
+        <div className="mt-8 paper-card p-5 max-w-2xl fade-up">
+          <p className="text-sm text-muted-foreground mb-2">
+            E se você quisesse acrescentar um sonho seu aqui?
+          </p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const t = draft.trim();
+              if (!t) return;
+              setExtra((x) => [...x, t]);
+              setDraft("");
+            }}
+            className="flex gap-2"
+          >
+            <input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="escreva um sonho…"
+              aria-label="Seu sonho"
+              className="flex-1 rounded-md border border-border bg-card px-3 py-2 text-base text-foreground focus:outline-none focus:border-[var(--gold)] transition-colors"
+              maxLength={120}
+            />
+            <button
+              type="submit"
+              className="rounded-md border border-[var(--gold)] bg-card px-4 py-2 text-sm text-foreground hover:bg-[var(--gold)] hover:text-primary-foreground transition-colors"
+            >
+              guardar
+            </button>
+          </form>
+          {extra.length > 0 && (
+            <ul className="mt-4 space-y-2">
+              {extra.map((e, i) => (
+                <li key={i} className="hand text-xl text-foreground fade-up flex items-center gap-2">
+                  <span className="text-[var(--gold)]" aria-hidden>✦</span> {e}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </Section>
   );
 }
+
 
 function Carta() {
   return (
