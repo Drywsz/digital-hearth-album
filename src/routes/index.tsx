@@ -112,7 +112,7 @@ function TopNav() {
         </ul>
       </div>
       {open && (
-        <ul className="md:hidden border-t border-border bg-background/95 px-4 py-3 grid grid-cols-2 gap-2 text-sm">
+        <ul className="md:hidden border-t border-border bg-background/95 px-4 py-3 grid grid-cols-2 gap-2 text-sm animate-fade-in">
           {NAV.map((n) => (
             <li key={n.id}>
               <button
