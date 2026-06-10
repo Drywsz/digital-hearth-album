@@ -89,19 +89,21 @@ function TopNav() {
           ✦ diário
         </button>
         <button
-          aria-label="Abrir menu"
+          aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="md:hidden rounded-md border border-border px-3 py-1.5 text-sm"
+          className={`menu-btn md:hidden ${open ? "is-open" : ""}`}
         >
-          {open ? "Fechar" : "Menu"}
+          <span className="bar b1" />
+          <span className="bar b2" />
+          <span className="bar b3" />
         </button>
         <ul className="hidden md:flex items-center gap-5 text-sm">
           {NAV.map((n) => (
             <li key={n.id}>
               <button
                 onClick={() => scrollTo(n.id)}
-                className="text-muted-foreground hover:text-foreground transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors story-link"
               >
                 {n.label}
               </button>
